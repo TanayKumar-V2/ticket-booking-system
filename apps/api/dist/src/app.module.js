@@ -20,6 +20,8 @@ const core_1 = require("@nestjs/core");
 const roles_guard_1 = require("./common/guards/roles.guard");
 const payments_module_1 = require("./payments/payments.module");
 const notifications_module_1 = require("./notifications/notifications.module");
+const nestjs_pino_1 = require("nestjs-pino");
+const nestjs_prometheus_1 = require("@willsoto/nestjs-prometheus");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -43,6 +45,20 @@ exports.AppModule = AppModule = __decorate([
                 }]),
             payments_module_1.PaymentsModule,
             notifications_module_1.NotificationsModule,
+            nestjs_pino_1.LoggerModule.forRoot({
+                pinoHttp: {
+                    transport: process.env.NODE_ENV !== 'production'
+                        ? { target: 'pino-pretty' }
+                        : undefined,
+                    level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
+                },
+            }),
+            nestjs_prometheus_1.PrometheusModule.register({
+                path: '/metrics',
+                defaultMetrics: {
+                    enabled: true,
+                },
+            }),
         ],
         controllers: [],
         providers: [
