@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import * as argon2 from 'argon2';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { NeonHttpDatabase } from 'drizzle-orm/neon-http';
+import { NeonDatabase } from 'drizzle-orm/neon-serverless';
 import * as schema from '../db/schema';
 import { randomUUID } from 'crypto';
 import { eq, and } from 'drizzle-orm';
@@ -15,7 +15,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     @Inject(DATABASE_CONNECTION)
-    private readonly db: NeonHttpDatabase<typeof schema>,
+    private readonly db: NeonDatabase<typeof schema>,
   ) {}
 
   async register(dto: RegisterDto) {

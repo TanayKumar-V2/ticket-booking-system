@@ -12,6 +12,10 @@ const database_module_1 = require("./db/database.module");
 const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./users/users.module");
 const throttler_1 = require("@nestjs/throttler");
+const events_module_1 = require("./events/events.module");
+const seats_module_1 = require("./seats/seats.module");
+const bookings_module_1 = require("./bookings/bookings.module");
+const bullmq_1 = require("@nestjs/bullmq");
 const core_1 = require("@nestjs/core");
 const roles_guard_1 = require("./common/guards/roles.guard");
 let AppModule = class AppModule {
@@ -23,6 +27,14 @@ exports.AppModule = AppModule = __decorate([
             database_module_1.DatabaseModule,
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
+            events_module_1.EventsModule,
+            seats_module_1.SeatsModule,
+            bookings_module_1.BookingsModule,
+            bullmq_1.BullModule.forRoot({
+                connection: {
+                    url: process.env.REDIS_URL || 'redis://localhost:6379',
+                },
+            }),
             throttler_1.ThrottlerModule.forRoot([{
                     ttl: 60000,
                     limit: 100,

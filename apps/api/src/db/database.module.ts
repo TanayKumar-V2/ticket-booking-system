@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import { Pool } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
 import * as schema from './schema';
 
 export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
@@ -11,8 +11,8 @@ export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
     {
       provide: DATABASE_CONNECTION,
       useFactory: () => {
-        const sql = neon(process.env.DATABASE_URL!);
-        return drizzle(sql, { schema });
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+        return drizzle(pool, { schema });
       },
     },
   ],

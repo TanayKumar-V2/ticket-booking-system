@@ -48,7 +48,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const database_module_1 = require("../db/database.module");
-const neon_http_1 = require("drizzle-orm/neon-http");
+const neon_serverless_1 = require("drizzle-orm/neon-serverless");
 const schema = __importStar(require("../db/schema"));
 const drizzle_orm_1 = require("drizzle-orm");
 let UsersService = class UsersService {
@@ -82,6 +82,6 @@ exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)(database_module_1.DATABASE_CONNECTION)),
-    __metadata("design:paramtypes", [neon_http_1.NeonHttpDatabase])
+    __metadata("design:paramtypes", [neon_serverless_1.NeonDatabase])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

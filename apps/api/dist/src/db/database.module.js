@@ -42,7 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseModule = exports.DATABASE_CONNECTION = void 0;
 const common_1 = require("@nestjs/common");
 const serverless_1 = require("@neondatabase/serverless");
-const neon_http_1 = require("drizzle-orm/neon-http");
+const neon_serverless_1 = require("drizzle-orm/neon-serverless");
 const schema = __importStar(require("./schema"));
 exports.DATABASE_CONNECTION = 'DATABASE_CONNECTION';
 let DatabaseModule = class DatabaseModule {
@@ -55,8 +55,8 @@ exports.DatabaseModule = DatabaseModule = __decorate([
             {
                 provide: exports.DATABASE_CONNECTION,
                 useFactory: () => {
-                    const sql = (0, serverless_1.neon)(process.env.DATABASE_URL);
-                    return (0, neon_http_1.drizzle)(sql, { schema });
+                    const pool = new serverless_1.Pool({ connectionString: process.env.DATABASE_URL });
+                    return (0, neon_serverless_1.drizzle)(pool, { schema });
                 },
             },
         ],

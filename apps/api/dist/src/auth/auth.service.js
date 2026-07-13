@@ -51,7 +51,7 @@ const users_service_1 = require("../users/users.service");
 const jwt_1 = require("@nestjs/jwt");
 const argon2 = __importStar(require("argon2"));
 const database_module_1 = require("../db/database.module");
-const neon_http_1 = require("drizzle-orm/neon-http");
+const neon_serverless_1 = require("drizzle-orm/neon-serverless");
 const schema = __importStar(require("../db/schema"));
 const crypto_1 = require("crypto");
 const drizzle_orm_1 = require("drizzle-orm");
@@ -141,6 +141,6 @@ exports.AuthService = AuthService = __decorate([
     __param(2, (0, common_1.Inject)(database_module_1.DATABASE_CONNECTION)),
     __metadata("design:paramtypes", [users_service_1.UsersService,
         jwt_1.JwtService,
-        neon_http_1.NeonHttpDatabase])
+        neon_serverless_1.NeonDatabase])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

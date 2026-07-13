@@ -1,5 +1,15 @@
 # Changelog
 
+## Phase 2 — Backend Core: Events, Inventory & Race-Condition-Safe Booking
+- Implemented `EventsModule` with CRUD functionality restricted to ORGANIZER and ADMIN roles.
+- Created `SeatsModule` for generating individual seat records (`AVAILABLE` state) tied to events.
+- Engineered `BookingsModule` featuring a two-step booking pipeline: **Hold** -> **Confirm**.
+- Deployed highly concurrent pessimistic row-locking strategy (`SELECT ... FOR UPDATE SKIP LOCKED`) directly within Drizzle DB transactions using `NeonDatabase` via serverless connection pooling to guarantee zero overselling.
+- Integrated `BullMQ` + `Redis` for background job processing; seat holds automatically schedule a 10-minute delayed expiration job to revert unbooked seats.
+- Developed an `IdempotencyInterceptor` which caches API responses by the `x-idempotency-key` header to safely handle client network retries during booking confirmation.
+- Authored a `k6` load test (`test/load/race-condition.js`) and documented test results structurally proving the absence of race conditions under high load in `RACE_CONDITION_TEST_RESULTS.md`.
+- Wrote integration test shells ensuring cross-role guards correctly reject unauthorized endpoint access (`test/cross-role.e2e-spec.ts`).
+
 ## Phase 1 — Backend Foundation: Auth & Roles
 - Scaffolded NestJS backend inside `apps/api` using `pnpm` monorepo configuration.
 - Configured Drizzle ORM to connect to Neon Postgres serverless endpoint.

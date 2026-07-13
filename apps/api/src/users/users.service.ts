@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { DATABASE_CONNECTION } from '../db/database.module';
-import { NeonHttpDatabase } from 'drizzle-orm/neon-http';
+import { NeonDatabase } from 'drizzle-orm/neon-serverless';
 import * as schema from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -9,7 +9,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class UsersService {
   constructor(
     @Inject(DATABASE_CONNECTION)
-    private readonly db: NeonHttpDatabase<typeof schema>,
+    private readonly db: NeonDatabase<typeof schema>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
