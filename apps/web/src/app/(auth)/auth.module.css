@@ -1,0 +1,105 @@
+.auth-page {
+  min-height: calc(100dvh - var(--header-height));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-6);
+  position: relative;
+  background: var(--gradient-hero);
+}
+
+.auth-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(600px circle at 50% 40%, hsla(234, 89%, 64%, 0.06), transparent 50%);
+  pointer-events: none;
+}
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-10);
+  box-shadow: var(--shadow-2xl);
+  animation: scale-in var(--duration-slow) var(--ease-out);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.auth-logo {
+  width: 48px;
+  height: 48px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-2xl);
+  margin: 0 auto var(--space-5);
+  box-shadow: 0 0 30px hsla(234, 89%, 64%, 0.2);
+}
+
+.auth-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.auth-subtitle {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.auth-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.auth-error {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-danger-subtle);
+  border: 1px solid hsla(0, 84%, 62%, 0.2);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  animation: fade-down var(--duration-normal) var(--ease-out);
+}
+
+.auth-submit {
+  margin-top: var(--space-2);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: var(--space-6);
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+
+.auth-footer a {
+  color: var(--color-accent);
+  font-weight: 500;
+}
