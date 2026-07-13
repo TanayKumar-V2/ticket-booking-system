@@ -51,6 +51,8 @@ exports.bookings = (0, pg_core_1.pgTable)('bookings', {
     status: (0, exports.bookingStatusEnum)('status').notNull().default('PENDING'),
     totalAmount: (0, pg_core_1.integer)('total_amount').notNull(),
     idempotencyKey: (0, pg_core_1.varchar)('idempotency_key', { length: 255 }).unique(),
+    razorpayOrderId: (0, pg_core_1.varchar)('razorpay_order_id', { length: 255 }),
+    razorpayPaymentId: (0, pg_core_1.varchar)('razorpay_payment_id', { length: 255 }),
     createdAt: (0, pg_core_1.timestamp)('created_at').defaultNow().notNull(),
     updatedAt: (0, pg_core_1.timestamp)('updated_at').defaultNow().notNull(),
 });

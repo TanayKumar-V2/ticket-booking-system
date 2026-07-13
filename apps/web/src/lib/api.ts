@@ -104,18 +104,25 @@ export const bookingsApi = {
   hold: (token: string, data: { eventId: string; quantity: number }) =>
     fetcher('/bookings/hold', { method: 'POST', token, body: JSON.stringify(data) }),
 
-  confirm: (token: string, data: { eventId: string }, idempotencyKey?: string) => {
+  checkout: (token: string, data: { eventId: string }, idempotencyKey?: string) => {
     const headers: Record<string, string> = {};
     if (idempotencyKey) {
       headers['x-idempotency-key'] = idempotencyKey;
     }
-    return fetcher('/bookings/confirm', {
+    return fetcher('/bookings/checkout', {
       method: 'POST',
       token,
       headers,
       body: JSON.stringify(data),
     });
   },
+
+  confirm: (token: string, data: { bookingId: string, razorpayPaymentId: string, razorpayOrderId: string, razorpaySignature: string }) =>
+    fetcher('/bookings/confirm', {
+      method: 'POST',
+      token,
+      body: JSON.stringify(data),
+    }),
 
   myBookings: (token: string) =>
     fetcher('/bookings/my-bookings', { token }),

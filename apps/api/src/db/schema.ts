@@ -63,6 +63,8 @@ export const bookings = pgTable('bookings', {
   status: bookingStatusEnum('status').notNull().default('PENDING'),
   totalAmount: integer('total_amount').notNull(),
   idempotencyKey: varchar('idempotency_key', { length: 255 }).unique(), // optional, if tracking on booking row directly
+  razorpayOrderId: varchar('razorpay_order_id', { length: 255 }),
+  razorpayPaymentId: varchar('razorpay_payment_id', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

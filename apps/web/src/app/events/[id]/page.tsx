@@ -70,16 +70,68 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     }
   };
 
-  const handleConfirm = async () => {
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) return resolve(true);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleCheckout = async () => {
     if (!token) return;
     setError('');
     setBookingStep('confirming');
     const idempotencyKey = `booking-${id}-${user?.id}-${Date.now()}`;
     try {
-      await bookingsApi.confirm(token, { eventId: id }, idempotencyKey);
-      setBookingStep('confirmed');
+      const res = await loadRazorpay();
+      if (!res) throw new Error('Razorpay SDK failed to load');
+
+      // 1. Create Checkout (Backend creates order)
+      const checkoutData = await bookingsApi.checkout(token, { eventId: id }, idempotencyKey);
+
+      // 2. Open Razorpay Modal
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'mock_key_id',
+        amount: checkoutData.amount,
+        currency: checkoutData.currency,
+        name: 'Eventrix',
+        description: `Tickets for ${event?.title}`,
+        order_id: checkoutData.razorpayOrderId,
+        handler: async function (response: any) {
+          try {
+            // 3. Confirm Booking on success
+            await bookingsApi.confirm(token, {
+              bookingId: checkoutData.bookingId,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+            setBookingStep('confirmed');
+          } catch (err: any) {
+            setError(err.message || 'Payment verification failed');
+            setBookingStep('error');
+          }
+        },
+        prefill: {
+          email: user?.email,
+        },
+        theme: {
+          color: '#6366f1',
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+        setError(response.error.description || 'Payment failed');
+        setBookingStep('error');
+      });
+      rzp.open();
     } catch (err: any) {
-      setError(err.message || 'Failed to confirm booking');
+      setError(err.message || 'Failed to initialize checkout');
       setBookingStep('error');
     }
   };
@@ -171,7 +223,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                 <button
                   className="btn btn-primary btn-lg"
                   style={{ width: '100%' }}
-                  onClick={handleConfirm}
+                  onClick={handleCheckout}
                   disabled={bookingStep === 'confirming'}
                 >
                   {bookingStep === 'confirming' ? (

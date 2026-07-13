@@ -18,6 +18,7 @@ const bookings_module_1 = require("./bookings/bookings.module");
 const bullmq_1 = require("@nestjs/bullmq");
 const core_1 = require("@nestjs/core");
 const roles_guard_1 = require("./common/guards/roles.guard");
+const payments_module_1 = require("./payments/payments.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,6 +40,7 @@ exports.AppModule = AppModule = __decorate([
                     ttl: 60000,
                     limit: 100,
                 }]),
+            payments_module_1.PaymentsModule,
         ],
         controllers: [],
         providers: [

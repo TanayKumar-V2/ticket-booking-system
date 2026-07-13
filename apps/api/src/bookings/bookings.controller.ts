@@ -2,8 +2,8 @@ import { Controller, Post, Body, UseGuards, Request, UsePipes, UseInterceptors, 
 import { BookingsService } from './bookings.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
-import { holdSeatsSchema, confirmBookingSchema } from './dto/booking.dto';
-import type { HoldSeatsDto, ConfirmBookingDto } from './dto/booking.dto';
+import { holdSeatsSchema, confirmBookingSchema, createCheckoutSchema } from './dto/booking.dto';
+import type { HoldSeatsDto, ConfirmBookingDto, CreateCheckoutDto } from './dto/booking.dto';
 import { IdempotencyInterceptor } from '../common/interceptors/idempotency.interceptor';
 import { ApiBearerAuth, ApiTags, ApiHeader } from '@nestjs/swagger';
 
@@ -28,13 +28,27 @@ export class BookingsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('confirm')
+  @Post('checkout')
   @ApiBearerAuth()
   @ApiHeader({ name: 'x-idempotency-key', required: false })
   @UseInterceptors(IdempotencyInterceptor)
+  @UsePipes(new ZodValidationPipe(createCheckoutSchema))
+  async createCheckout(@Request() req: any, @Body() body: CreateCheckoutDto) {
+    const idempotencyKey = req.headers['x-idempotency-key'];
+    return this.bookingsService.createCheckout(req.user.id, body.eventId, idempotencyKey);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('confirm')
+  @ApiBearerAuth()
   @UsePipes(new ZodValidationPipe(confirmBookingSchema))
   async confirmBooking(@Request() req: any, @Body() body: ConfirmBookingDto) {
-    const idempotencyKey = req.headers['x-idempotency-key'];
-    return this.bookingsService.confirmBooking(req.user.id, body, idempotencyKey);
+    return this.bookingsService.confirmBooking(
+      req.user.id,
+      body.bookingId,
+      body.razorpayPaymentId,
+      body.razorpayOrderId,
+      body.razorpaySignature,
+    );
   }
 }

@@ -7,8 +7,17 @@ export const holdSeatsSchema = z.object({
 
 export type HoldSeatsDto = z.infer<typeof holdSeatsSchema>;
 
+export const createCheckoutSchema = z.object({
+  eventId: z.string().uuid(),
+});
+
+export type CreateCheckoutDto = z.infer<typeof createCheckoutSchema>;
+
 export const confirmBookingSchema = z.object({
-  eventId: z.string().uuid(), // Confirm the hold for this event
+  bookingId: z.string().uuid(),
+  razorpayPaymentId: z.string(),
+  razorpayOrderId: z.string(),
+  razorpaySignature: z.string(),
 });
 
 export type ConfirmBookingDto = z.infer<typeof confirmBookingSchema>;

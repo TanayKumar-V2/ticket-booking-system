@@ -496,6 +496,44 @@ export declare const bookings: import("drizzle-orm/pg-core").PgTableWithColumns<
         }, {}, {
             length: 255;
         }>;
+        razorpayOrderId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "razorpay_order_id";
+            tableName: "bookings";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            length: 255;
+        }>;
+        razorpayPaymentId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "razorpay_payment_id";
+            tableName: "bookings";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            length: 255;
+        }>;
         createdAt: import("drizzle-orm/pg-core").PgColumn<{
             name: "created_at";
             tableName: "bookings";

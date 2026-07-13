@@ -9,6 +9,7 @@ import { BookingsModule } from './bookings/bookings.module';
 import { BullModule } from '@nestjs/bullmq';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './common/guards/roles.guard';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { RolesGuard } from './common/guards/roles.guard';
       ttl: 60000,
       limit: 100, // global rate limit
     }]),
+    PaymentsModule,
   ],
   controllers: [],
   providers: [

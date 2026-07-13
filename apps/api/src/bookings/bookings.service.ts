@@ -7,12 +7,15 @@ import { HoldSeatsDto, ConfirmBookingDto } from './dto/booking.dto';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
+import { PaymentsService } from '../payments/payments.service';
+
 @Injectable()
 export class BookingsService {
   constructor(
     @Inject(DATABASE_CONNECTION)
     private readonly db: NeonDatabase<typeof schema>,
     @InjectQueue('seat-holds') private seatHoldQueue: Queue,
+    private readonly paymentsService: PaymentsService,
   ) {}
 
   async holdSeats(userId: string, dto: HoldSeatsDto) {
@@ -61,13 +64,13 @@ export class BookingsService {
     });
   }
 
-  async confirmBooking(userId: string, dto: ConfirmBookingDto, idempotencyKey?: string) {
+  async createCheckout(userId: string, eventId: string, idempotencyKey?: string) {
     return await this.db.transaction(async (tx) => {
-      // Find held seats by this user for the event
+      // Find held seats
       const heldSeats = await tx.select().from(schema.seats)
         .where(
           and(
-            eq(schema.seats.eventId, dto.eventId),
+            eq(schema.seats.eventId, eventId),
             eq(schema.seats.heldByUserId, userId),
             eq(schema.seats.status, 'HELD')
           )
@@ -78,19 +81,81 @@ export class BookingsService {
         throw new BadRequestException('No held seats found or hold expired');
       }
 
-      const seatIds = heldSeats.map(s => s.id);
       const totalAmount = heldSeats.reduce((acc, seat) => acc + seat.price, 0);
 
-      // Create Booking
+      // Create Booking row as PENDING
       const [booking] = await tx.insert(schema.bookings).values({
         userId,
-        eventId: dto.eventId,
+        eventId,
         totalAmount,
-        status: 'CONFIRMED',
+        status: 'PENDING',
         idempotencyKey,
       }).returning();
 
-      // Create booking seats mapping
+      // Generate Razorpay Order
+      const order = await this.paymentsService.createOrder(totalAmount, booking.id);
+
+      // Update booking with Razorpay Order ID
+      const [updatedBooking] = await tx.update(schema.bookings)
+        .set({ razorpayOrderId: order.id })
+        .where(eq(schema.bookings.id, booking.id))
+        .returning();
+
+      return {
+        bookingId: updatedBooking.id,
+        razorpayOrderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+      };
+    });
+  }
+
+  async confirmBooking(
+    userId: string, 
+    bookingId: string, 
+    razorpayPaymentId: string, 
+    razorpayOrderId: string, 
+    razorpaySignature: string
+  ) {
+    // 1. Verify Signature
+    const isValid = this.paymentsService.verifySignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
+    if (!isValid) {
+      throw new BadRequestException('Invalid payment signature');
+    }
+
+    return await this.db.transaction(async (tx) => {
+      // 2. Find Pending Booking
+      const [booking] = await tx.select().from(schema.bookings)
+        .where(
+          and(
+            eq(schema.bookings.id, bookingId),
+            eq(schema.bookings.userId, userId),
+            eq(schema.bookings.status, 'PENDING')
+          )
+        )
+        .for('update');
+
+      if (!booking) {
+        throw new BadRequestException('Booking not found or already processed');
+      }
+
+      // 3. Find held seats
+      const heldSeats = await tx.select().from(schema.seats)
+        .where(
+          and(
+            eq(schema.seats.eventId, booking.eventId),
+            eq(schema.seats.heldByUserId, userId),
+            eq(schema.seats.status, 'HELD')
+          )
+        );
+
+      if (heldSeats.length === 0) {
+        throw new BadRequestException('Held seats expired before payment confirmation');
+      }
+
+      const seatIds = heldSeats.map(s => s.id);
+
+      // 4. Create booking seats mapping
       const bookingSeatsData = seatIds.map(seatId => ({
         bookingId: booking.id,
         seatId,
@@ -98,14 +163,21 @@ export class BookingsService {
 
       await tx.insert(schema.bookingSeats).values(bookingSeatsData);
 
-      // Mark seats as BOOKED
+      // 5. Mark seats as BOOKED
       await tx.update(schema.seats)
-        .set({
-          status: 'BOOKED',
-        })
+        .set({ status: 'BOOKED' })
         .where(inArray(schema.seats.id, seatIds));
 
-      return { booking, seats: heldSeats };
+      // 6. Mark booking as CONFIRMED
+      const [confirmedBooking] = await tx.update(schema.bookings)
+        .set({ 
+          status: 'CONFIRMED',
+          razorpayPaymentId,
+        })
+        .where(eq(schema.bookings.id, booking.id))
+        .returning();
+
+      return { booking: confirmedBooking, seats: heldSeats };
     });
   }
 

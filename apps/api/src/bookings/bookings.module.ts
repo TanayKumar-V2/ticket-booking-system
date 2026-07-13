@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { BookingsService } from './bookings.service';
 import { BookingsController } from './bookings.controller';
 import { QueueModule } from '../queue/queue.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
-  imports: [QueueModule],
+  imports: [QueueModule, PaymentsModule],
   providers: [BookingsService],
   controllers: [BookingsController],
   exports: [BookingsService],
