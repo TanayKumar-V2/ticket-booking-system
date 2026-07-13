@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # We omit Postgres from local docker-compose because the architecture specifies using Neon (Serverless Postgres).
+  # We will use Neon's branching feature for isolated local dev/preview environments.
+  # This matches the production environment much closer than running a local vanilla Postgres image.
+
+volumes:
+  redis_data:
