@@ -10,6 +10,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './common/guards/roles.guard';
 import { PaymentsModule } from './payments/payments.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PaymentsModule } from './payments/payments.module';
       limit: 100, // global rate limit
     }]),
     PaymentsModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [

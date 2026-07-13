@@ -19,6 +19,7 @@ const bullmq_1 = require("@nestjs/bullmq");
 const core_1 = require("@nestjs/core");
 const roles_guard_1 = require("./common/guards/roles.guard");
 const payments_module_1 = require("./payments/payments.module");
+const notifications_module_1 = require("./notifications/notifications.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -41,6 +42,7 @@ exports.AppModule = AppModule = __decorate([
                     limit: 100,
                 }]),
             payments_module_1.PaymentsModule,
+            notifications_module_1.NotificationsModule,
         ],
         controllers: [],
         providers: [

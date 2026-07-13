@@ -73,9 +73,19 @@ export default function BookingsPage() {
                 </div>
                 
                 {booking.status === 'CONFIRMED' && (
-                  <Link href={`/events/${booking.eventId}`} className="btn btn-secondary btn-sm">
-                    View Event
-                  </Link>
+                  <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                    <button 
+                      className="btn btn-primary btn-sm" 
+                      onClick={() => {
+                        alert(`Downloading tickets for ${booking.event.title}...\n(In a real app, this would generate a PDF via a backend endpoint)`);
+                      }}
+                    >
+                      ↓ Download
+                    </button>
+                    <Link href={`/events/${booking.eventId}`} className="btn btn-secondary btn-sm">
+                      View Event
+                    </Link>
+                  </div>
                 )}
               </div>
             );

@@ -9,6 +9,9 @@ import { DatabaseModule } from '../db/database.module';
     BullModule.registerQueue({
       name: 'seat-holds',
     }),
+    BullModule.registerQueue({
+      name: 'notifications',
+    }),
   ],
   providers: [SeatHoldProcessor],
   exports: [BullModule],

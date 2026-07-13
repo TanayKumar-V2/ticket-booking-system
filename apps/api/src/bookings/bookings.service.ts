@@ -9,6 +9,8 @@ import { Queue } from 'bullmq';
 
 import { PaymentsService } from '../payments/payments.service';
 
+import { NotificationsService } from '../notifications/notifications.service';
+
 @Injectable()
 export class BookingsService {
   constructor(
@@ -16,6 +18,7 @@ export class BookingsService {
     private readonly db: NeonDatabase<typeof schema>,
     @InjectQueue('seat-holds') private seatHoldQueue: Queue,
     private readonly paymentsService: PaymentsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async holdSeats(userId: string, dto: HoldSeatsDto) {
@@ -123,7 +126,7 @@ export class BookingsService {
       throw new BadRequestException('Invalid payment signature');
     }
 
-    return await this.db.transaction(async (tx) => {
+    const { confirmedBooking, heldSeats, user, event } = await this.db.transaction(async (tx) => {
       // 2. Find Pending Booking
       const [booking] = await tx.select().from(schema.bookings)
         .where(
@@ -138,6 +141,10 @@ export class BookingsService {
       if (!booking) {
         throw new BadRequestException('Booking not found or already processed');
       }
+
+      // Fetch user and event for notification
+      const [user] = await tx.select().from(schema.users).where(eq(schema.users.id, userId));
+      const [event] = await tx.select().from(schema.events).where(eq(schema.events.id, booking.eventId));
 
       // 3. Find held seats
       const heldSeats = await tx.select().from(schema.seats)
@@ -177,8 +184,16 @@ export class BookingsService {
         .where(eq(schema.bookings.id, booking.id))
         .returning();
 
-      return { booking: confirmedBooking, seats: heldSeats };
+      return { confirmedBooking, heldSeats, user, event };
     });
+
+    // 7. Queue Notification (Async, outside transaction)
+    if (user && event) {
+      const seatLabels = heldSeats.map(s => s.seatIdentifier);
+      await this.notificationsService.queueTicketEmail(user.email, confirmedBooking.id, event.title, seatLabels);
+    }
+
+    return { booking: confirmedBooking, seats: heldSeats };
   }
 
   async getMyBookings(userId: string) {
